@@ -8,6 +8,8 @@ from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from apps.usuario.access import my_login_required
 from django.contrib.auth.hashers import make_password
+from passlib.hash import django_pbkdf2_sha256 as handler
+
 
 
 from passlib.hash import pbkdf2_sha256
@@ -35,7 +37,9 @@ def registro(request):
 			
 			#enc = pbkdf2_sha256.encrypt(user.dni, rounds=10,salt_size=32)
 			
-			user.clave = Usuario.objects.encriptar(user.dni)
+			#user.clave = Usuario.objects.encriptar(user.dni)
+
+			user.clave = Usuario.objects.encriptarPass(user.dni)
 			user.estado = False
 			"""	
 			email = formulario.cleaned_data.get("email")
@@ -97,8 +101,8 @@ def iniciarSesion(request):
 			usuario = formulario.cleaned_data['usuario']
 			clave = formulario.cleaned_data['clave']
 			#usrLog = Usuario.objects.login_ok(usuario, clave)
-			usrLog = Usuario.objects.checka(usuario, clave)
-			if Usuario.objects.checka(usuario, clave) != None:
+			usrLog = Usuario.objects.validarPass(usuario, clave)
+			if usrLog != None:
 				request.session['usuario'] = usrLog
 				return redirect('principal:index_adoa')
 			else:
@@ -197,7 +201,7 @@ def recuperar_contrasena(request):
 
 	return render_to_response('usuario/RecuperarContrasena.html', locals(), context_instance = RequestContext(request))
 
-
+@my_login_required
 def cambiar_clave(request,registro):
 	# formulario - msg_no - ver_error - lista_err: se deben llamar asi, el include las referencian con ese nombre
 	
@@ -218,7 +222,9 @@ def cambiar_clave(request,registro):
 			actual = formulario.cleaned_data['actual']
 			nueva = formulario.cleaned_data['nueva']
 			repetida = formulario.cleaned_data['repetida']
+
 			cambio = Usuario.objects.cambiar_clave(usuario.id, actual, nueva)
+
 			if cambio: return HttpResponseRedirect('/adoa/')
 			else: ver_error = True
 		else:
@@ -247,6 +253,7 @@ def confirmar_cuenta(request,registro):
 		if extension == "com":
 			usuario.tipousuario = TipoUsuario.objects.get(id = 1)
 			#usuario.clave = '456123'
+			usuario.estado = True
 			usuario.save()
 			token1.delete()
 		return render_to_response('usuario/ConfirmarCuenta.html', locals(), context_instance = RequestContext(request))

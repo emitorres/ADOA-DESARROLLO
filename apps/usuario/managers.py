@@ -1,6 +1,8 @@
 from django.db import models
 import hashlib
 import uuid
+from passlib.hash import django_pbkdf2_sha256 as handler
+
 #--------------------------------------------------------------------------
 
 class TipoUsuarioManager(models.Manager):
@@ -26,8 +28,12 @@ class UsuarioManager(models.Manager):
 
 	def cambiar_clave(self, id, actual, nueva):
 		usuario = self.model.objects.get(id = id)
-		if usuario.clave != actual: return False
-		usuario.clave = nueva
+
+		h = handler.verify(actual, usuario.clave)
+
+
+		if not h: return False
+		usuario.clave = handler.encrypt(nueva)
 		usuario.save()
 		return True
 		
@@ -43,11 +49,34 @@ class UsuarioManager(models.Manager):
 		salt = uuid.uuid4().hex
 		return hashlib.sha256(salt.encode() + clave.encode()).hexdigest() + ':' + salt
 
-	def checka(self, clave , usuario):
+	def validar(self, clave , usuario):
 		existe = self.model.objects.get(email = usuario)
 		password, salt = existe.clave.split(':')
 		return password == hashlib.sha256(salt.encode() + clave.encode()).hexdigest()
 			
+
+	def check_passwd(self,usuario, clave):
+		
+	# ... get 'hsh_passwd' from database based on 'user' ...
+		user = self.model.objects.get(email = usuario)
+		user.clave = user.clave.split(':')
+		salt = user.clave[1]
+		hsh = user.clave[2]
+		if hsh == hashlib.sha1(salt + clave).hexdigest():
+			return True
+		return False
+
+	def encriptarPass(self, clave):
+		return handler.encrypt(clave)
+
+	def validarPass(self,usuario,clave):
+		existe = self.model.objects.get(email = usuario)
+ 		h = handler.verify(clave, existe.clave)
+ 		if h & existe.estado == True:
+ 			return existe
+ 		else:
+ 			return None
+
 """
 def check_password(hashed_password, user_password):
     password, salt = hashed_password.split(':')

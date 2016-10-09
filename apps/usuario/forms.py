@@ -1,5 +1,6 @@
 from django import forms
 from apps.usuario.models import Usuario, TipoUsuario, Menu, MenuTipoUsuario
+from passlib.hash import django_pbkdf2_sha256 as handler
 
 class RegistroForm(forms.ModelForm):
 	class Meta:
@@ -59,7 +60,12 @@ class CambioPwdForm(forms.Form):
 	def clean_repetida(self):
 		nueva = self.cleaned_data.get('nueva')
 		repetida = self.cleaned_data.get('repetida')
-		if nueva != repetida:
+		#if nueva != repetida:
+		n = handler.encrypt(nueva)
+		r = handler.encrypt(repetida)
+
+		h = handler.verify(repetida, n)
+		if not h:
 			raise forms.ValidationError('Clave nueva y repetida deben ser iguales')
 		return repetida			
 
