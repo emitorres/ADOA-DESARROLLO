@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
 from apps.usuario.forms import RegistroForm, IngresoForm,PerfilForm,PerfilIndexForm, RecuperarContrasenaForm,CambioPwdForm
-from apps.usuario.models import Usuario, TipoUsuario
+from apps.usuario.models import Usuario, TipoUsuario,token
 from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
@@ -11,6 +11,7 @@ from django.contrib.auth.hashers import make_password
 
 
 from passlib.hash import pbkdf2_sha256
+import uuid
 def usuario_index(request):
 	return render_to_response('usuario/InicioSesion.html', locals(), context_instance = RequestContext(request))
 
@@ -31,10 +32,11 @@ def registro(request):
 		valido = formulario.is_valid()
 		if valido:
 			user = formulario.save(commit=False)
-			"""
-			enc = pbkdf2_sha256.encrypt(user.dni, rounds=12000,salt_size=32)
-			"""
-			user.clave = user.dni
+			
+			#enc = pbkdf2_sha256.encrypt(user.dni, rounds=10,salt_size=32)
+			
+			user.clave = Usuario.objects.encriptar(user.dni)
+			user.estado = False
 			"""	
 			email = formulario.cleaned_data.get("email")
 			email_base, proveedor = email.split("@")
@@ -43,8 +45,19 @@ def registro(request):
 				user.tipousuario = TipoUsuario.objects.get(id = 1)
 
 				user.save()
-			else:			"""
+			else:	
+					"""
+			
+
 			user.save()
+			usuario = formulario.cleaned_data['email']
+			usuario1 = Usuario.objects.get(email = usuario)
+
+			tokenCadena = uuid.uuid4()
+			token1 = token(1,tokenCadena, usuario1.id)
+
+		
+			token1.save()
 			usuarioMail = formulario.cleaned_data['email']
 			#clave = formulario.cleaned_data['clave']
 			usrLog = Usuario.objects.email_ok(usuarioMail)
@@ -52,10 +65,10 @@ def registro(request):
 				subject = 'Recuperar Contrasena'
 
 				sender = usrLog.email
-
+				to = token.objects.get(usuario_id = usrLog.id)
 				recipients = ['emitorres93@gmail.com']
 
-				message = 'shttp://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(usrLog.id)
+				message = 'shttp://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(to.token)
 				mail = EmailMessage(subject, message, sender,recipients)
 				mail.send()
 			#formulario.save()
@@ -83,8 +96,9 @@ def iniciarSesion(request):
 		if valido:
 			usuario = formulario.cleaned_data['usuario']
 			clave = formulario.cleaned_data['clave']
-			usrLog = Usuario.objects.login_ok(usuario, clave)
-			if usrLog != None:
+			#usrLog = Usuario.objects.login_ok(usuario, clave)
+			usrLog = Usuario.objects.checka(usuario, clave)
+			if Usuario.objects.checka(usuario, clave) != None:
 				request.session['usuario'] = usrLog
 				return redirect('principal:index_adoa')
 			else:
@@ -220,14 +234,22 @@ def cambiar_clave(request,registro):
 
 def confirmar_cuenta(request,registro):
 
-	usuario = Usuario.objects.get(id = registro)
-	emailuser = usuario.email
-	email_base, proveedor = emailuser.split("@")
-	dominio, extension = proveedor.split(".")
-	if extension == "com":
-		usuario.tipousuario = TipoUsuario.objects.get(id = 1)
-		#usuario.clave = '456123'
-		usuario.save()
-	
 
-	return render_to_response('usuario/ConfirmarCuenta.html', locals(), context_instance = RequestContext(request))
+
+	token2 = token.objects.all()
+
+	if token2:
+		token1 = token.objects.get(token = registro)
+		usuario = Usuario.objects.get(id = token1.usuario_id)
+		emailuser = usuario.email
+		email_base, proveedor = emailuser.split("@")
+		dominio, extension = proveedor.split(".")
+		if extension == "com":
+			usuario.tipousuario = TipoUsuario.objects.get(id = 1)
+			#usuario.clave = '456123'
+			usuario.save()
+			token1.delete()
+		return render_to_response('usuario/ConfirmarCuenta.html', locals(), context_instance = RequestContext(request))
+	else:
+		return render_to_response('usuario/acceso_denegado.html', locals(), context_instance = RequestContext(request))			
+	

@@ -38,6 +38,7 @@ class Usuario(models.Model):#blank = false, null= false
     carrera     = models.CharField(max_length=100)
     clave       = models.CharField(max_length=100)
     email       = models.EmailField()
+    estado      = models.BooleanField()
     created     = models.DateTimeField(auto_now_add = True) # Usar datetime.date.today() - import datetime
     updated     = models.DateTimeField(auto_now = True)
 
@@ -52,6 +53,12 @@ class Usuario(models.Model):#blank = false, null= false
         ordering = ['tipousuario', 'nombre']
 
 # ---------------------------------------------------------------------
+class token(models.Model):
+    token = models.CharField(max_length = 50,blank = True, null= True)
+    usuario = models.ForeignKey(Usuario,blank = True, null= True)
+
+    def __unicode__(self):
+        return u'%s - %s' % (self.token)
 
 # ------------ Modelo Menu ------------
 
@@ -78,6 +85,7 @@ class Menu(models.Model):
 # el matenimiento de accesos (y no solamente entrar por el menu a crear los accesos)
 
 class MenuTipoUsuario(models.Model):
+    
     menu        = models.ForeignKey(Menu)
     tipousuario = models.ForeignKey(TipoUsuario)
 

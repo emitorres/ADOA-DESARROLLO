@@ -11,7 +11,7 @@ urlpatterns = patterns('',
 	url(r'^acceso_denegado/$', usuario_acceso_denegado, name = 'usuario_acceso_denegado'),
 	url(r'^informacion/$', informacion_registro, name = 'usuario_informacion_registro'),
 	url(r'^recuperar_contrasena/$', recuperar_contrasena, name = 'usuario_recuperar_contrasena'),
-	url(r'^confirmar_cuenta/(\d+)/', confirmar_cuenta, name = 'usuario_confirmar_cuenta'),
+	url(r'^confirmar_cuenta/([0-9A-Za-z_\-]+)/$',  confirmar_cuenta, name = 'usuario_confirmar_cuenta'),
 	url(r'^cambiar_clave/(\d+)/', cambiar_clave, name = 'usuario_cambiar_clave'),
 
 

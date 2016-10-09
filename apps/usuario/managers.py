@@ -1,5 +1,6 @@
 from django.db import models
-
+import hashlib
+import uuid
 #--------------------------------------------------------------------------
 
 class TipoUsuarioManager(models.Manager):
@@ -38,6 +39,20 @@ class UsuarioManager(models.Manager):
 		else:
 			return existe
 
+	def encriptar(self,clave):
+		salt = uuid.uuid4().hex
+		return hashlib.sha256(salt.encode() + clave.encode()).hexdigest() + ':' + salt
+
+	def checka(self, clave , usuario):
+		existe = self.model.objects.get(email = usuario)
+		password, salt = existe.clave.split(':')
+		return password == hashlib.sha256(salt.encode() + clave.encode()).hexdigest()
+			
+"""
+def check_password(hashed_password, user_password):
+    password, salt = hashed_password.split(':')
+    return password == hashlib.sha256(salt.encode() + user_password.encode()).hexdigest()
+"""
 
 #--------------------------------------------------------------------------
 
