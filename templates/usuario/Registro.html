@@ -10,11 +10,10 @@
 
 {% if valido %}
 
-    <h4> {% image_tag "ok.gif" %} {{ msg_ok }} </h4>
-    <pre> Nombre: {{ nombre }} </pre>
-    
-    
-<a href="{% url 'usuario:usuario_index' %}">Publicar</a>
+
+{% include 'usuario/InformacionRegistro.html' %}
+
+
 
 {% else %}
 
@@ -68,12 +67,14 @@
             </div>
 
             <div class="card-action">
-            	  <button class="btn waves-effect waves-light" type="submit" name="action">Registrarse!<i class="material-icons right">send</i>
+            	  <button class="btn waves-effect waves-light" type="submit" name="action" onclick="Materialize.toast('Registrado con exito', 4000)">Registrarse!<i class="material-icons right">send</i>
   				  </button>
   			</div>
   		</form>	
         </div>
     </div>
+
+
 </div>
 
 

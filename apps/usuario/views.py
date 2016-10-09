@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
-from apps.usuario.forms import RegistroForm, IngresoForm,PerfilForm,PerfilIndexForm
-from apps.usuario.models import Usuario
+from apps.usuario.forms import RegistroForm, IngresoForm,PerfilForm,PerfilIndexForm, RecuperarContrasenaForm,CambioPwdForm
+from apps.usuario.models import Usuario, TipoUsuario
 from django.http import HttpResponseRedirect
-
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 from apps.usuario.access import my_login_required
+from django.contrib.auth.hashers import make_password
 
 
+from passlib.hash import pbkdf2_sha256
 def usuario_index(request):
 	return render_to_response('usuario/InicioSesion.html', locals(), context_instance = RequestContext(request))
 
@@ -27,8 +30,36 @@ def registro(request):
 		formulario = RegistroForm(request.POST, instance = usuario)
 		valido = formulario.is_valid()
 		if valido:
-			formulario.save()
-			#return redirect('usuario:usuario_index')
+			user = formulario.save(commit=False)
+			"""
+			enc = pbkdf2_sha256.encrypt(user.dni, rounds=12000,salt_size=32)
+			"""
+			user.clave = user.dni
+			"""	
+			email = formulario.cleaned_data.get("email")
+			email_base, proveedor = email.split("@")
+			dominio, extension = proveedor.split(".")
+			if extension == "edu":
+				user.tipousuario = TipoUsuario.objects.get(id = 1)
+
+				user.save()
+			else:			"""
+			user.save()
+			usuarioMail = formulario.cleaned_data['email']
+			#clave = formulario.cleaned_data['clave']
+			usrLog = Usuario.objects.email_ok(usuarioMail)
+			if usrLog != None:
+				subject = 'Recuperar Contrasena'
+
+				sender = usrLog.email
+
+				recipients = ['emitorres93@gmail.com']
+
+				message = 'shttp://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(usrLog.id)
+				mail = EmailMessage(subject, message, sender,recipients)
+				mail.send()
+			#formulario.save()
+			#return redirect('usuario:usuario_informacion_registro')
 			nombre = formulario.cleaned_data['nombre']
 		else:
 			ver_error = True
@@ -95,7 +126,7 @@ def perfil_editar(request,registro):
 		valido = formulario.is_valid()
 		if valido:
 			formulario.save()
-			#return redirect('usuario:usuario_index')
+			return redirect('usuario:perfil_index')
 			#nombre = formulario.cleaned_data['nombre']
 		else:
 			ver_error = True
@@ -115,3 +146,88 @@ def usuario_salir(request):
 def usuario_acceso_denegado(request):
 	return render_to_response('usuario/acceso_denegado.html', locals(), context_instance = RequestContext(request))
 
+def informacion_registro(request):
+	return render_to_response('usuario/InformacionRegistro.html', locals(), context_instance = RequestContext(request))
+
+
+def recuperar_contrasena(request):
+	valido = False
+	ver_error = False
+	msg_no  = 'Ingreso no valido'
+	lista_err = []
+	if request.method == 'POST':
+		formulario = RecuperarContrasenaForm(request.POST)
+		valido = formulario.is_valid()
+		if valido:
+			usuarioMail = formulario.cleaned_data['email']
+			#clave = formulario.cleaned_data['clave']
+			usrLog = Usuario.objects.email_ok(usuarioMail)
+			if usrLog != None:
+				subject = 'Recuperar Contrasena'
+
+				sender = usrLog.email
+
+				recipients = ['emitorres93@gmail.com']
+
+				message = 'shttp://127.0.0.1:8000/usuario/cambiar_clave/'+str(usrLog.id)
+				mail = EmailMessage(subject, message, sender,recipients)
+				mail.send()
+		else:
+			ver_error = True
+			# Arma una lista con errores
+			for field in formulario:
+				for error in field.errors:
+					lista_err.append(field.label + ': ' + error)
+	else:
+		formulario = RecuperarContrasenaForm()
+
+	return render_to_response('usuario/RecuperarContrasena.html', locals(), context_instance = RequestContext(request))
+
+
+def cambiar_clave(request,registro):
+	# formulario - msg_no - ver_error - lista_err: se deben llamar asi, el include las referencian con ese nombre
+	
+
+
+	valido = False
+	ver_error = False
+	msg_no = 'Cambio de clave no valido'
+	lista_err = []
+	try:
+		usuario = Usuario.objects.get(id = registro)
+	except:
+		usuario = Usuario()
+	if request.method == 'POST':
+		formulario = CambioPwdForm(request.POST)
+		valido = formulario.is_valid()
+		if valido:
+			actual = formulario.cleaned_data['actual']
+			nueva = formulario.cleaned_data['nueva']
+			repetida = formulario.cleaned_data['repetida']
+			cambio = Usuario.objects.cambiar_clave(usuario.id, actual, nueva)
+			if cambio: return HttpResponseRedirect('/adoa/')
+			else: ver_error = True
+		else:
+			ver_error = True
+			# Arma una lista con errores
+			for field in formulario:
+				for error in field.errors:
+					lista_err.append(field.label + ': ' + error)
+	else:
+		formulario = CambioPwdForm()
+
+	return render_to_response('usuario/cambio_clave.html', locals(), context_instance = RequestContext(request))
+
+def confirmar_cuenta(request,registro):
+
+	usuario = Usuario.objects.get(id = registro)
+	emailuser = usuario.email
+	email_base, proveedor = emailuser.split("@")
+	dominio, extension = proveedor.split(".")
+	if extension == "com":
+		usuario.tipousuario = TipoUsuario.objects.get(id = 1)
+		#usuario.clave = '456123'
+		usuario.save()
+	
+
+	return render_to_response('usuario/ConfirmarCuenta.html', locals(), context_instance = RequestContext(request))

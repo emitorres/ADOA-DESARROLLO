@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from apps.usuario.managers import TipoUsuarioManager, UsuarioManager, MenuManager, MenuTipoUsuarioManager
+from passlib.hash import pbkdf2_sha256
+
 # ------------ Modelo Tipo Usuario ------------
 			
 class TipoUsuario(models.Model):
@@ -24,8 +26,13 @@ class TipoUsuario(models.Model):
 # ------------ Modelo Usuario ------------
 
 class Usuario(models.Model):#blank = false, null= false
+
+    def validate_vacio_nulo(valor):
+        if (valor == '') or (valor == None) or (len(valor) < 3):
+            raise ValidationError(u'%s no se puede' % valor)
+
     tipousuario = models.ForeignKey(TipoUsuario,blank = True, null= True)
-    nombre      = models.CharField(max_length=100)
+    nombre      = models.CharField(max_length=100 ,validators = [validate_vacio_nulo])
     apellido    = models.CharField(max_length=100)
     dni  		= models.CharField(max_length=15)
     carrera     = models.CharField(max_length=100)
@@ -39,6 +46,7 @@ class Usuario(models.Model):#blank = false, null= false
     def __unicode__(self):
         return u'%s - %s' % (self.nombre)
 
+    
     # La clase Meta interna es para especificar metadatos adicionales de un modelo
     class Meta:
         ordering = ['tipousuario', 'nombre']
@@ -76,5 +84,5 @@ class MenuTipoUsuario(models.Model):
     objects = MenuTipoUsuarioManager() # Para usar managers
 
     class Meta:
-        db_table = u'db_menu_tipousuarios' # Esto si queremos usar nombres propios y no los de Django
+        db_table = u'usuario_menu_tipousuarios' # Esto si queremos usar nombres propios y no los de Django
         ordering = ['tipousuario', 'menu']

@@ -13,4 +13,15 @@ urlpatterns = patterns('',
     url(r'^',                 include('apps.principal.urls',      namespace = 'principal')),
  	url(r'^adoa/',                 include('apps.principal.urls',      namespace = 'principal_adoa')),
 
+
+
+
+
+
+
+
+
+
+
+
 )

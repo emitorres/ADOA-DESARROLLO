@@ -7,12 +7,16 @@
 {% endblock %}
 
 {% block contenido %}
+
+
+
 <div class="row">
   <div class="col s12 m12 l12 center">
 					ADOA 2.0
 	</div>
 </div>
 {% include 'tags/error_form.html' %}
+
 <div class="row">
   <div class="col s12 m8 l8 offset-m2 offset-l2">
   <!--<div class="col s12 m6 offset-m3">-->
@@ -26,17 +30,12 @@
 
               <div class="row">
                 <div class="input-field col s10 m10 l10">
-                  <label for="{{formulario.usuario.name}}">{{formulario.usuario.label}}</label>
-                  {{formulario.usuario}}     
+                  <label for="{{formulario.usuario.name}}">{{formulario.email.label}}</label>
+                  {{formulario.email}}     
                 </div>
               </div>
 
-              <div class="row">
-                <div class="input-field col s10 m10 l10">
-                  <label for="{{formulario.clave.name}}">{{formulario.clave.label}}</label>
-                  {{formulario.clave}}     
-                </div>
-              </div>
+             
                 
         </div>
         <div class="card-action center-align">
@@ -49,5 +48,6 @@
     </div>
   </div>
 </div>
+
 
 {% endblock %}

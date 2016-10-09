@@ -2,10 +2,13 @@
 
 {% if ver_error %}
 
-	<h4> {% image_tag "error.gif" %} {{ msg_no }} </h4>
+	<!--<h4> {% image_tag "error.gif" %} {{ msg_no }} </h4>-->
 
 	{% for registro in lista_err %}
-        <li style='color:red;'> {{ registro }} </li>
+        <!--<li style='color:red;'> {{ registro }} </li>-->
+        <script type="text/javascript">
+         Materialize.toast('{{ registro }}', 6000,'rounded')
+         </script>
 	{% endfor %}
 
 {% endif %}

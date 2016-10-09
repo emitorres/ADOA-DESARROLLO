@@ -29,6 +29,15 @@ class UsuarioManager(models.Manager):
 		usuario.clave = nueva
 		usuario.save()
 		return True
+		
+	def email_ok(self,email):
+		try:
+			existe = self.model.objects.get(email = email)
+		except self.model.DoesNotExist:
+			return None
+		else:
+			return existe
+
 
 #--------------------------------------------------------------------------
 
@@ -45,5 +54,13 @@ class MenuTipoUsuarioManager(models.Manager):
 
 	def todos(self):
 		return self.model.objects.all()
+
+	def emi(self, idmenu, idtipo):
+		try:
+			existe = self.model.objects.get(menu_id = idmenu.id, tipousuario_id = idtipo.id)
+		except self.model.DoesNotExist:
+			return None
+		else:
+			return existe
 
 #---------------------------------------------------------------------------
