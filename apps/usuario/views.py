@@ -66,13 +66,13 @@ def registro(request):
 			#clave = formulario.cleaned_data['clave']
 			usrLog = Usuario.objects.email_ok(usuarioMail)
 			if usrLog != None:
-				subject = 'Recuperar Contrasena'
+				subject = 'Verificacion de Email'
 
 				sender = usrLog.email
 				to = token.objects.get(usuario_id = usrLog.id)
 				recipients = ['emitorres93@gmail.com']
 
-				message = 'shttp://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(to.token)
+				message = 'Bienvenido a ADOA 2.0 por favor haga click en el siguiente enlace para confirmar su mail http://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(to.token)
 				mail = EmailMessage(subject, message, sender,recipients)
 				mail.send()
 			#formulario.save()
