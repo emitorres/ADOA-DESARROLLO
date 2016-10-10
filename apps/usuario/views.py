@@ -6,7 +6,7 @@ from apps.usuario.models import Usuario, TipoUsuario,token
 from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
-from apps.usuario.access import my_login_required
+from apps.usuario.access import my_login_required,my_access_required
 from django.contrib.auth.hashers import make_password
 from passlib.hash import django_pbkdf2_sha256 as handler
 
@@ -68,12 +68,12 @@ def registro(request):
 			if usrLog != None:
 				subject = 'Verificacion de Email'
 
-				sender = usrLog.email
+				fromUsuario ='adoa2.unla@gmail.com' 
 				to = token.objects.get(usuario_id = usrLog.id)
-				recipients = ['emitorres93@gmail.com']
+				fromMail = [usrLog.email]
 
-				message = 'Bienvenido a ADOA 2.0 por favor haga click en el siguiente enlace para confirmar su mail http://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(to.token)
-				mail = EmailMessage(subject, message, sender,recipients)
+				message = 'Hola ' +usrLog.nombre +' '+usrLog.apellido + ', bienvenido a ADOA 2.0 por favor haga click en el siguiente enlace para confirmar su email '+ 'http://127.0.0.1:8000/usuario/confirmar_cuenta/'+str(to.token) + '\n\n' + 'Usuario: ' + usrLog.email + '\n'+ 'Contrasena: '+ usrLog.dni
+				mail = EmailMessage(subject, message,fromUsuario,fromMail)
 				mail.send()
 			#formulario.save()
 			#return redirect('usuario:usuario_informacion_registro')
@@ -104,7 +104,10 @@ def iniciarSesion(request):
 			usrLog = Usuario.objects.validarPass(usuario, clave)
 			if usrLog != None:
 				request.session['usuario'] = usrLog
-				return redirect('principal:index_adoa')
+				if request.session['usuario'].tipousuario.id == 1:
+					return redirect('administrador:index_administrador')
+				else:
+					return redirect('principal:index_adoa')
 			else:
 				ver_error = True
 		else:
@@ -256,7 +259,19 @@ def confirmar_cuenta(request,registro):
 			usuario.estado = True
 			usuario.save()
 			token1.delete()
+
+		if extension == "edu":
+			usuario.tipousuario = TipoUsuario.objects.get(id = 2)
+			#usuario.clave = '456123'
+			usuario.estado = True
+			usuario.save()
+			token1.delete()
 		return render_to_response('usuario/ConfirmarCuenta.html', locals(), context_instance = RequestContext(request))
 	else:
 		return render_to_response('usuario/acceso_denegado.html', locals(), context_instance = RequestContext(request))			
+	
+def confirmar_cuenta2(request):
+
+	return render_to_response('usuario/ConfirmarCuenta.html', locals(), context_instance = RequestContext(request))
+	
 	

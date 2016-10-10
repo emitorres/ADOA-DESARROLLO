@@ -41,12 +41,47 @@ class RegistroForm(forms.ModelForm):
 		if len(nombre) < 3:
 			raise forms.ValidationError('El nombre debe tener mas de 3 caracteres')
 		return nombre
+		"""
+	def clean_dni(self):
+		dni = self.cleaned_data.get('dni')
+		if len(dni) != 8:
+			raise forms.ValidationError('El dni debe tener de 8 caracteres')
+		return dni	
+"""
 
+	def clean_dni(self):
+		dni = self.cleaned_data.get("dni")
+		punto = dni.split(".")
+		if punto == ".":
+			raise forms.ValidationError('El dni no debe tener puntos')
+		return dni	
+		
 class IngresoForm(forms.Form):
+	class Meta:
+			model = Usuario
+
 	usuario = forms.CharField(error_messages = {'required': 'Debe ingresar un usuario'})
 	clave   = forms.CharField(widget = forms.PasswordInput(),
 							  error_messages = {'required': 'Debe ingresar una clave'})
 	
+	def clean_usuario(self):
+		"""
+		email = self.cleaned_data.get('usuario')
+		existe = Usuario.objects.all()
+		for user in existe:
+			if user.email != email:
+				raise forms.ValidationError('No existe ningun usuario registrado con ese correo electronico.')
+			else:
+				return email				
+		"""
+		try:
+			email = self.cleaned_data.get('usuario')
+			existe = Usuario.objects.get(email = email)
+		except Usuario.DoesNotExist:
+			raise forms.ValidationError('No existe ningun usuario registrado con ese correo electronico.')
+		else:
+			return email	
+
 class CambioPwdForm(forms.Form):
 	actual = forms.CharField(widget = forms.PasswordInput(),
 							 error_messages = {'required': 'Debe ingresar la clave actual'})

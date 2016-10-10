@@ -26,6 +26,24 @@ class UsuarioManager(models.Manager):
 		else:
 			return existe
 
+
+	def validarPass(self,usuario,clave):
+
+		try:
+			existe = self.model.objects.get(email = usuario)
+		
+		except self.model.DoesNotExist:
+			return None
+		
+		h = handler.verify(clave, existe.clave)
+
+		if h & existe.estado == True:
+			return existe
+		else:
+			return None
+
+
+
 	def cambiar_clave(self, id, actual, nueva):
 		usuario = self.model.objects.get(id = id)
 
@@ -69,13 +87,6 @@ class UsuarioManager(models.Manager):
 	def encriptarPass(self, clave):
 		return handler.encrypt(clave)
 
-	def validarPass(self,usuario,clave):
-		existe = self.model.objects.get(email = usuario)
- 		h = handler.verify(clave, existe.clave)
- 		if h & existe.estado == True:
- 			return existe
- 		else:
- 			return None
 
 """
 def check_password(hashed_password, user_password):

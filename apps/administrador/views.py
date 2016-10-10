@@ -5,7 +5,7 @@ from apps.usuario.models import TipoUsuario, Usuario, Menu,MenuTipoUsuario
 from apps.usuario.forms import UsuarioForm, TipoUsuarioForm,MenuForm,MenuTipoUsuarioForm
 from django.forms.widgets import CheckboxSelectMultiple
 from apps.usuario.access import my_access_required
-
+@my_access_required
 def index_administrador(request):
 	return render_to_response('administrador/AdministradorBase.html', locals(), context_instance = RequestContext(request))
 @my_access_required

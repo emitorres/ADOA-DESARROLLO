@@ -13,6 +13,7 @@ urlpatterns = patterns('',
 	url(r'^recuperar_contrasena/$', recuperar_contrasena, name = 'usuario_recuperar_contrasena'),
 	url(r'^confirmar_cuenta/([0-9A-Za-z_\-]+)/$',  confirmar_cuenta, name = 'usuario_confirmar_cuenta'),
 	url(r'^cambiar_clave/(\d+)/', cambiar_clave, name = 'usuario_cambiar_clave'),
+	#url(r'^confirmar_cuenta2/$',  confirmar_cuenta2, name = 'usuario_confirmar_cuenta'),
 
 
 

@@ -296,3 +296,8 @@ nav i, nav [class^="mdi-"], nav [class*="mdi-"], nav i.material-icons {
     position: fixed;
 }
 /*---------------------------CSS DE ADOABASE---------------------------------*/
+
+
+
+#panel-oculto { display: block; position: fixed;background-color: white; z-index: 1000;}
+/*width: 200px; height: 100%; z-index: 1000; background-color: #222; }*/

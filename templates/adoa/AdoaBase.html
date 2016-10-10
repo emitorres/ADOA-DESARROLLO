@@ -103,7 +103,7 @@
 	<div class="wrapper"><!--WRAPPER PRINCIPAL-->
 		<div class="sidebar1">
 		<aside id="left-sidebar-nav">
-			<ul id="staggered-list" class="side-nav fixed leftside-navigation ps-container ps-active-y" style="width: 240px">
+			<ul id="panel-oculto" class="side-nav fixed" style="width: 240px; margin-top:64px">
     			<li>
 					<div class="userView" style="padding-left: 0px;padding-right: 0px;padding-top: 10px;">
 						<img class="background" src=" {% static "images/office.jpg" %}" >
@@ -158,7 +158,9 @@
             		<div class="divider"></div>
             		
                         
-
+<div id="panel-oculto" style="display:none">sd</div>
+ 
+<a href="#" id="alternar-panel-oculto" style="margin-left: 200px"><i class="material-icons">list</i></a>
 
 
 
@@ -254,7 +256,29 @@
 
 
 </div><!--MAIN PRINCIPAL-->
-
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $('#alternar-panel-oculto').toggle( 
+        function(e){ 
+            /*$('#panel-oculto').slideDown("slow");*/
+            $('#panel-oculto').toggle( "slide" ,1000);
+            $('#main').css({'padding-left': '0px'});
+            $(this).find('i').text('list');
+            e.preventDefault();
+        }, 
+        function(e){ 
+             
+            /*$('#panel-oculto').slideUp("fast");*/
+            $('#panel-oculto').toggle( "slide",1000);
+            $('#main').css({'padding-left': '240px'});
+            
+            /*$(this).text('<i class="material-icons">menu</i>');*/
+            $(this).find('i').text('list');
+            e.preventDefault();
+        }
+    );
+});
+</script>
             
 </body>
 </html>
